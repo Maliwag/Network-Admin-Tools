@@ -1,0 +1,31 @@
+# Prompt for input to gain information on the emails you are searching for
+$senderEmail = Read-Host "Enter sender's email address"
+$subject = Read-Host "Enter part of the subject of email"
+$bodyText = Read-Host "Enter part of the body text of email"
+$recieved = Read-Host "Enter the date the email was received (format: mm/dd/yyyy)"
+
+# Build the email search query
+$query = ""
+if ($senderEmail) { $query += "From:$senderEmail" }
+if ($subject -and $senderEmail) { $query += ","}
+if ($subject) { $query += "Subject:$subject" }
+if ($bodyText -and $subject) { $query += "," }
+if ($bodyText) { $query += "Body:$bodytext" }
+if ($recieved -and $bodyText) { $query += "," }
+if ($recieved) { $query += "Received:$recieved" }
+
+$date = Get-Date
+$dateStr = $date.ToString("MM-dd-yyyy")
+
+# Build command and place log file in Administrators mailbox labeled with todays date
+$command = "Get-Mailbox -ResultSize Unlimited | Search-Mailbox -SearchQuery $query -TargetMailbox 'Administrator' -TargetFolder $dateStr -LogLevel Full"
+$logOnlyCommand = $command + " -LogOnly"
+$deleteCommand = $command + " -DeleteContent"
+
+# Print the log only and delete commands to screen for easy copying.
+Write-Host " "
+Write-Output "Log Only: $logOnlyCommand"
+Write-Host " "
+Write-Output "Delete  : $deleteCommand"
+Write-Host " "
+Pause
